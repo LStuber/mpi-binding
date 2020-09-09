@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This is a binding script that will restrict number of cores and GPUS to each MPI.
+# This binding wrapper restricts number of cores and GPUS to each MPI rank.
 # Usage:  mpirun -n 10 ./bind.sh ./my_app
 
 # Use SLURM variables if detected
