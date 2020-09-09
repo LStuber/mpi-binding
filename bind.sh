@@ -32,6 +32,11 @@ fi
 ncores_per_socket=$(lscpu | grep "Core(s)" | awk '{print $4}')
 nsockets=$(lscpu | grep Sock | awk '{print $2}')
 
+# For Power
+physical_cores_interval=1
+if lscpu | grep "Model" | grep -iq power; then physical_cores_interval=$(lscpu | grep "Thread(s) per core:  " | awk '{print $4}'); fi
+
+
 if [[ -z $NGPUS ]]; then
    NGPUS=$(nvidia-smi --query-gpu=count --format=csv -i 0 | head -2 | tail -1)
 fi
@@ -68,9 +73,9 @@ fi
 #establish list of cores
 intrasocket_rank=$((OMPI_COMM_WORLD_LOCAL_RANK % nmpi_per_socket))
 first=$((isocket*ncores_per_socket + intrasocket_rank*ncores_per_mpi))
-cores=$first
+cores=$((first*physical_cores_interval))
 for i in $(seq 1 $((ncores_per_mpi-1))); do
-   cores=$cores,$((first+i))
+   cores=$cores,$(((first+i)*physical_cores_interval))
 done
 
 if [[ $HYPERTHREAD == 1 ]]; then
